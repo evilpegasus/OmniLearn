@@ -315,7 +315,7 @@ class PET(keras.Model):
 
         
         #Randomly drop features not present in other datasets
-        encoded  = RandomDrop(self.feature_drop if  'all' in self.mode else 0.0,num_skip=self.num_keep)(input_features)                        
+        encoded = RandomDrop(self.feature_drop if  'all' in self.mode else 0.0,num_skip=self.num_keep)(input_features)                        
         encoded = get_encoding(encoded,self.projection_dim)
 
         time = FourierProjection(input_time,self.projection_dim)
