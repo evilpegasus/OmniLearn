@@ -31,21 +31,20 @@ def parse_arguments():
     parser.add_argument("--b2", type=float, default=0.99, help="beta2 for Lion optimizer")
     parser.add_argument("--lr_factor", type=float, default=10., help="factor for slower learning rate")
     parser.add_argument("--nid", type=int, default=0, help="Training ID for multiple trainings")
-    parser.add_argument("--fine_tune", action='store_true', default=False, help='Fine tune a model')
-    parser.add_argument("--local", action='store_true', default=False, help='Use local embedding')
+    parser.add_argument("--fine_tune", action="store_true", default=False, help="Fine tune a model")
+    parser.add_argument("--local", action="store_true", default=False, help="Use local embedding")
     parser.add_argument("--num_layers", type=int, default=8, help="Number of transformer layers")
     parser.add_argument("--drop_probability", type=float, default=0.0, help="Drop probability")
-    parser.add_argument("--simple", action='store_true', default=False, help='Use simplified head model')
-    parser.add_argument("--talking_head", action='store_true', default=False, help='Use talking head attention')
-    parser.add_argument("--layer_scale", action='store_true', default=False, help='Use layer scale in the residual connections')
+    parser.add_argument("--simple", action="store_true", default=False, help="Use simplified head model")
+    parser.add_argument("--talking_head", action="store_true", default=False, help="Use talking head attention")
+    parser.add_argument("--layer_scale", action="store_true", default=False, help="Use layer scale in the residual connections")
     return parser.parse_args()
 
 def get_data_loader(flags):
-
     if flags.dataset == 'top':
         train = utils.TopDataLoader(os.path.join(flags.folder,'TOP', 'train_ttbar.h5'),flags.batch,hvd.rank(),hvd.size())
         val = utils.TopDataLoader(os.path.join(flags.folder,'TOP', 'val_ttbar.h5'),flags.batch,hvd.rank(),hvd.size())
-    if flags.dataset == 'toy':
+    elif flags.dataset == 'toy':
         train = utils.ToyDataLoader(100000//hvd.size(),flags.batch,hvd.rank(),hvd.size())
         val = utils.ToyDataLoader(100000//hvd.size(),flags.batch,hvd.rank(),hvd.size())
     elif flags.dataset == 'tau':
@@ -101,7 +100,7 @@ def main():
 
 
     if flags.fine_tune:
-        if hvd.rank()==0:
+        if hvd.rank() == 0:
             model_name = utils.get_model_name(flags,flags.fine_tune).replace(flags.dataset,'jetclass').replace('fine_tune','baseline').replace(flags.mode,'all')
             model_path = os.path.join(flags.folder, 'checkpoints', model_name)
             logger.info(f"Loading model weights from {model_path}")
@@ -116,7 +115,7 @@ def main():
         hvd.callbacks.BroadcastGlobalVariablesCallback(0),
         hvd.callbacks.MetricAverageCallback(),
         keras.callbacks.EarlyStopping(patience=flags.stop_epoch, restore_best_weights=True),
-        keras.callbacks.ReduceLROnPlateau(monitor='val_loss',patience=200, min_lr=1e-6)
+        keras.callbacks.ReduceLROnPlateau(monitor='val_loss', patience=200, min_lr=1e-6)
     ]
 
     if hvd.rank() == 0:
@@ -138,10 +137,10 @@ def main():
                       validation_steps =val_loader.steps_per_epoch,
                       verbose=hvd.rank() == 0,
                       )
-    if hvd.rank() ==0:
+    if hvd.rank() == 0:
         with open(os.path.join(flags.folder,'histories',utils.get_model_name(flags,flags.fine_tune).replace(".weights.h5",".pkl")),"wb") as f:
             pickle.dump(hist.history, f)
-                            
+
 
 if __name__ == "__main__":
     main()
