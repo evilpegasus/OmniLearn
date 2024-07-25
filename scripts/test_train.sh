@@ -24,3 +24,5 @@ image=vmikuni/tensorflow:ngc-23.12-tf2-v1
 # srun -n 4 -c 32 --cpu_bind=cores -G 4 --gpu-bind=single:1  python scripts/train.py --dataset toy
 srun -l -u --mpi=pmi2 shifter --image=$image \
   bash -c "python scripts/train.py --dataset toy --folder /pscratch/sd/m/mingfong/omnilearn/"
+
+date
