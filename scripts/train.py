@@ -6,6 +6,7 @@ import horovod.tensorflow.keras as hvd
 import argparse
 import logging
 import pickle
+from pathlib import Path
 
 # Custom local imports
 import utils
@@ -138,7 +139,11 @@ def main():
                       verbose=hvd.rank() == 0,
                       )
     if hvd.rank() == 0:
-        with open(os.path.join(flags.folder,'histories',utils.get_model_name(flags,flags.fine_tune).replace(".weights.h5",".pkl")),"wb") as f:
+        history_path = os.path.join(flags.folder,'histories')
+        # Path(os.path.dirname(history_path)).mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(history_path):
+            os.makedirs(history_path)
+        with open(os.path.join(history_path, utils.get_model_name(flags,flags.fine_tune).replace(".weights.h5",".pkl")), "wb") as f:
             pickle.dump(hist.history, f)
 
 
