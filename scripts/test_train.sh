@@ -15,8 +15,8 @@ export OMP_NUM_THREADS=1
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
+date
 set -x    # log commands
-
 image=vmikuni/tensorflow:ngc-23.12-tf2-v1
 
 #run the application:
